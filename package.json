@@ -1,0 +1,28 @@
+{
+  "name": "smartthings-ac-display-rule-installer",
+  "version": "0.1.0",
+  "description": "Instalador guiado de uma SmartThings Rule que apaga o visor de ar-condicionados Samsung ao ligar.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24.8.0"
+  },
+  "scripts": {
+    "setup": "tsx src/index.ts setup",
+    "status": "tsx src/index.ts status",
+    "update": "tsx src/index.ts update",
+    "remove": "tsx src/index.ts remove",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "clean": "node --eval \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\""
+  },
+  "dependencies": {
+    "@smartthings/cli": "^2.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
