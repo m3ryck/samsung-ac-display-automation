@@ -1,3 +1,5 @@
+import type { TranslationResource } from './en.js'
+
 export const ptBR = {
   common: {
     warningPrefix: 'Aviso',
@@ -82,6 +84,7 @@ export const ptBR = {
     cliProcessFailed: 'A SmartThings CLI terminou com código {{exitCode}}: {{details}}',
     cliInvalidJson: 'A SmartThings CLI retornou JSON inválido.',
     unexpected: 'Erro inesperado: {{details}}',
+    noDetails: 'Nenhum detalhe foi fornecido.',
     resources: {
       locations: 'as localizações',
       devices: 'os dispositivos',
@@ -92,4 +95,4 @@ export const ptBR = {
       updatedRule: 'a Rule atualizada',
     },
   },
-} as const
+} as const satisfies TranslationResource

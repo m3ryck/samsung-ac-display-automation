@@ -12,6 +12,9 @@ const expectedByLocale: Record<
     invalidDelay: string
     invalidCliResponse: string
     cliProcessFailed: string
+    cliProcessFailedWithoutDetails: string
+    cliLaunchFailedWithoutDetails: string
+    unexpectedWithoutDetails: string
     unexpected: string
   }
 > = {
@@ -20,6 +23,11 @@ const expectedByLocale: Record<
     invalidCliResponse: 'The SmartThings CLI returned an invalid response while reading the created Rule.',
     cliProcessFailed:
       'SmartThings CLI exited with code 1: Authorization: Bearer [REDACTED]\nLogin recusado',
+    cliProcessFailedWithoutDetails:
+      'SmartThings CLI exited with code 23: No details were provided.',
+    cliLaunchFailedWithoutDetails:
+      'Could not start the SmartThings CLI: No details were provided.',
+    unexpectedWithoutDetails: 'Unexpected error: No details were provided.',
     unexpected: 'Unexpected error: Authorization: Bearer [REDACTED]\nConnection refused',
   },
   'pt-BR': {
@@ -28,6 +36,11 @@ const expectedByLocale: Record<
       'A SmartThings CLI retornou uma resposta inválida ao consultar a Rule criada.',
     cliProcessFailed:
       'A SmartThings CLI terminou com código 1: Authorization: Bearer [REDACTED]\nLogin recusado',
+    cliProcessFailedWithoutDetails:
+      'A SmartThings CLI terminou com código 23: Nenhum detalhe foi fornecido.',
+    cliLaunchFailedWithoutDetails:
+      'Não foi possível iniciar a SmartThings CLI: Nenhum detalhe foi fornecido.',
+    unexpectedWithoutDetails: 'Erro inesperado: Nenhum detalhe foi fornecido.',
     unexpected: 'Erro inesperado: Authorization: Bearer [REDACTED]\nConnection refused',
   },
 }
@@ -67,6 +80,27 @@ describe('formatError', () => {
           translator,
         ),
         expected.cliProcessFailed,
+      )
+    })
+
+    test(`substitutes localized details for empty CLI diagnostics in ${locale}`, async () => {
+      const translator = await createTranslator(locale)
+      const expected = expectedByLocale[locale]
+
+      assert.equal(
+        formatError(
+          new AppError('cliProcessFailed', { exitCode: 23 }),
+          translator,
+        ),
+        expected.cliProcessFailedWithoutDetails,
+      )
+      assert.equal(
+        formatError(new AppError('cliLaunchFailed'), translator),
+        expected.cliLaunchFailedWithoutDetails,
+      )
+      assert.equal(
+        formatError(new Error(''), translator),
+        expected.unexpectedWithoutDetails,
       )
     })
 

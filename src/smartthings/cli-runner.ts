@@ -104,14 +104,15 @@ export class CliRunner implements CliCommandRunner {
       ])
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      throw new AppError('cliLaunchFailed', { details: sanitizeCliError(message) })
+      const details = sanitizeCliError(message)
+      throw new AppError('cliLaunchFailed', details ? { details } : {})
     }
 
     if (result.exitCode !== 0) {
       const details = result.stderr.trim() || result.stdout.trim()
       throw new AppError('cliProcessFailed', {
         exitCode: result.exitCode,
-        details: sanitizeCliError(details),
+        ...(details ? { details: sanitizeCliError(details) } : {}),
       })
     }
 

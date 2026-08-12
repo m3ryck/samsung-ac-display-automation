@@ -6,6 +6,14 @@ const exhaustive = (value: never): never => {
   throw new Error(`Unhandled AppError code: ${String(value)}`)
 }
 
+const detailsOrFallback = (
+  details: string | number | undefined,
+  translator: Translator,
+): string =>
+  details === undefined || details === ''
+    ? translator.t('errors.noDetails')
+    : String(details)
+
 const translatedResource = (
   resource: string | number | undefined,
   translator: Translator,
@@ -33,7 +41,9 @@ const translatedResource = (
 export const formatError = (error: unknown, translator: Translator): string => {
   if (!(error instanceof AppError)) {
     const details = error instanceof Error ? error.message : String(error)
-    return translator.t('errors.unexpected', { details: sanitizeCliError(details) })
+    return translator.t('errors.unexpected', {
+      details: detailsOrFallback(sanitizeCliError(details), translator),
+    })
   }
 
   switch (error.code) {
@@ -59,12 +69,12 @@ export const formatError = (error: unknown, translator: Translator): string => {
       })
     case 'cliLaunchFailed':
       return translator.t('errors.cliLaunchFailed', {
-        details: error.details.details,
+        details: detailsOrFallback(error.details.details, translator),
       })
     case 'cliProcessFailed':
       return translator.t('errors.cliProcessFailed', {
-        exitCode: error.details.exitCode,
-        details: error.details.details,
+        exitCode: error.details.exitCode ?? translator.t('common.unknown'),
+        details: detailsOrFallback(error.details.details, translator),
       })
     case 'cliInvalidJson':
       return translator.t('errors.cliInvalidJson')
