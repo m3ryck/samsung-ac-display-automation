@@ -29,7 +29,8 @@
     "clean": "node --eval \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\""
   },
   "dependencies": {
-    "@smartthings/cli": "^2.1.2"
+    "@smartthings/cli": "^2.1.2",
+    "i18next": "^26.3.6"
   },
   "overrides": {
     "axios": "1.18.0"
