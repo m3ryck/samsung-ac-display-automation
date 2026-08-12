@@ -1,4 +1,5 @@
 import { LIGHTING_CAPABILITY, deviceDisplayName } from './devices.js'
+import { AppError } from '../errors.js'
 import type { Device, ManagedRule, RuleAction, RuleRequest } from './types.js'
 
 export const RULE_MARKER = '[Visor AC SmartThings]'
@@ -9,7 +10,7 @@ const buildDescription = (deviceId: string, delaySeconds: number): string =>
 
 export const buildDisplayOffRule = (device: Device, delaySeconds: number): RuleRequest => {
   if (!Number.isInteger(delaySeconds) || delaySeconds < 0 || delaySeconds > 60) {
-    throw new Error('O atraso deve ser um número inteiro entre 0 e 60 segundos.')
+    throw new AppError('invalidDelay')
   }
 
   const commandAction: RuleAction = {

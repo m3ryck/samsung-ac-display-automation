@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 
+import { AppError } from '../../src/errors.js'
 import {
-  CliCommandError,
   CliRunner,
   sanitizeCliError,
   smartThingsInvocation,
@@ -80,17 +80,37 @@ describe('CliRunner', () => {
     await assert.rejects(
       runner.runJson(['locations', '--json']),
       (error: unknown) =>
-        error instanceof CliCommandError &&
-        /Login recusado/.test(error.message) &&
-        !/do-not-leak/.test(error.message),
+        error instanceof AppError &&
+        error.code === 'cliProcessFailed' &&
+        error.details.exitCode === 1 &&
+        error.details.details === 'Authorization: Bearer [REDACTED]\nLogin recusado',
     )
   })
 
-  test('rejects malformed JSON with a safe diagnostic', async () => {
+  test('stores a sanitized launch failure as structured details', async () => {
+    const runner = new CliRunner({
+      execute: async () => {
+        throw new Error('token=launch-secret connection refused')
+      },
+    })
+
+    await assert.rejects(
+      runner.runJson(['locations', '--json']),
+      (error: unknown) =>
+        error instanceof AppError &&
+        error.code === 'cliLaunchFailed' &&
+        error.details.details === 'token=[REDACTED] connection refused',
+    )
+  })
+
+  test('rejects malformed JSON with a stable error code', async () => {
     const runner = new CliRunner({
       execute: async () => ({ exitCode: 0, stdout: 'not-json', stderr: '' }),
     })
 
-    await assert.rejects(runner.runJson(['locations', '--json']), /JSON inválido/i)
+    await assert.rejects(
+      runner.runJson(['locations', '--json']),
+      (error: unknown) => error instanceof AppError && error.code === 'cliInvalidJson',
+    )
   })
 })

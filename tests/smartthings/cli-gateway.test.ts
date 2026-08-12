@@ -6,6 +6,7 @@ import { describe, test } from 'node:test'
 
 import { LIGHTING_CAPABILITY } from '../../src/domain/devices.js'
 import type { RuleRequest } from '../../src/domain/types.js'
+import { AppError } from '../../src/errors.js'
 import { CliSmartThingsGateway } from '../../src/smartthings/cli-gateway.js'
 import type { CliCommandRunner } from '../../src/smartthings/cli-runner.js'
 
@@ -74,6 +75,51 @@ describe('CliSmartThingsGateway', () => {
         arguments_: ['rules', '--location', 'location-1', '--json'],
       },
     ])
+  })
+
+  test('identifies the resource behind every invalid CLI response', async () => {
+    const runner = new FakeRunner()
+    const gateway = new CliSmartThingsGateway({ runner })
+    const checks: Array<{
+      command: string
+      resource: string
+      invoke: () => Promise<unknown>
+    }> = [
+      { command: 'locations', resource: 'locations', invoke: () => gateway.listLocations() },
+      { command: 'devices', resource: 'devices', invoke: () => gateway.listDevices('location-1') },
+      {
+        command: 'devices:status',
+        resource: 'deviceStatus',
+        invoke: () => gateway.getDeviceStatus('device-1'),
+      },
+      {
+        command: 'capabilities',
+        resource: 'lightingCapability',
+        invoke: () => gateway.getLightingCapabilityDefinition(),
+      },
+      { command: 'rules', resource: 'rules', invoke: () => gateway.listRules('location-1') },
+      {
+        command: 'rules:create',
+        resource: 'createdRule',
+        invoke: () => gateway.createRule('location-1', ruleRequest),
+      },
+      {
+        command: 'rules:update',
+        resource: 'updatedRule',
+        invoke: () => gateway.updateRule('location-1', 'rule-1', ruleRequest),
+      },
+    ]
+
+    for (const check of checks) {
+      runner.responses.set(check.command, 'invalid')
+      await assert.rejects(
+        check.invoke(),
+        (error: unknown) =>
+          error instanceof AppError &&
+          error.code === 'invalidCliResponse' &&
+          error.details.resource === check.resource,
+      )
+    }
   })
 
   test('writes Rule input with restrictive permissions and always removes the temporary directory', async () => {

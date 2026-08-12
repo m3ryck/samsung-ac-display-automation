@@ -5,6 +5,7 @@ import type {
   StatusValue,
   ValidatedDeviceState,
 } from './types.js'
+import { AppError } from '../errors.js'
 
 export const LIGHTING_CAPABILITY = 'samsungce.airConditionerLighting'
 
@@ -31,23 +32,19 @@ export const validateDevice = (
 ): ValidatedDeviceState => {
   const capabilities = mainCapabilities(device)
   if (!capabilities.has('switch') || !capabilities.has(LIGHTING_CAPABILITY)) {
-    throw new Error(
-      'O dispositivo não possui switch e samsungce.airConditionerLighting no componente main.',
-    )
+    throw new AppError('missingCapabilities')
   }
 
   const main = status.components.main
   const switchState = statusValue<unknown>(main?.switch?.switch)
   if (switchState !== 'on' && switchState !== 'off') {
-    throw new Error('O dispositivo não informa main.switch.switch como on ou off.')
+    throw new AppError('invalidSwitchState')
   }
 
   const lighting = main?.[LIGHTING_CAPABILITY]
   const lightingState = statusValue<unknown>(lighting?.lighting)
   if (lightingState !== 'on' && lightingState !== 'off') {
-    throw new Error(
-      `O dispositivo não informa main.${LIGHTING_CAPABILITY}.lighting como on ou off.`,
-    )
+    throw new AppError('invalidLightingState')
   }
 
   const supportedLevels = statusValue<unknown>(lighting?.supportedLightingLevels)
@@ -56,11 +53,11 @@ export const validateDevice = (
     !supportedLevels.includes('on') ||
     !supportedLevels.includes('off')
   ) {
-    throw new Error('O dispositivo não declara suporte aos níveis on e off da iluminação.')
+    throw new AppError('unsupportedLightingLevels')
   }
 
   if (!definition.commands?.setLightingLevel) {
-    throw new Error('A capability não oferece o comando setLightingLevel.')
+    throw new AppError('missingLightingCommand')
   }
 
   return {

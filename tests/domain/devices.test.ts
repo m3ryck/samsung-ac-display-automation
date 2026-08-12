@@ -6,6 +6,7 @@ import {
   findCompatibleDevices,
   validateDevice,
 } from '../../src/domain/devices.js'
+import { AppError, type AppErrorCode } from '../../src/errors.js'
 import type {
   CapabilityDefinition,
   Device,
@@ -52,6 +53,9 @@ const validDefinition = (): CapabilityDefinition => ({
   },
 })
 
+const hasCode = (code: AppErrorCode) => (error: unknown): boolean =>
+  error instanceof AppError && error.code === code
+
 describe('findCompatibleDevices', () => {
   test('keeps only devices with switch and lighting on the main component', () => {
     const wrongComponent = compatibleDevice({
@@ -93,13 +97,34 @@ describe('validateDevice', () => {
     )
   })
 
+  test('rejects a device without the required main capabilities', () => {
+    const device = compatibleDevice({
+      components: [{ id: 'main', capabilities: [{ id: 'switch', version: 1 }] }],
+    })
+
+    assert.throws(
+      () => validateDevice(device, validStatus(), validDefinition()),
+      hasCode('missingCapabilities'),
+    )
+  })
+
   test('rejects a device without main.switch status', () => {
     const status = validStatus()
     delete status.components.main?.switch
 
     assert.throws(
       () => validateDevice(compatibleDevice(), status, validDefinition()),
-      /não informa main\.switch\.switch/i,
+      hasCode('invalidSwitchState'),
+    )
+  })
+
+  test('rejects a lighting status other than on or off', () => {
+    const status = validStatus()
+    status.components.main![LIGHTING_CAPABILITY]!.lighting = { value: 'dimmed' }
+
+    assert.throws(
+      () => validateDevice(compatibleDevice(), status, validDefinition()),
+      hasCode('invalidLightingState'),
     )
   })
 
@@ -111,7 +136,7 @@ describe('validateDevice', () => {
 
     assert.throws(
       () => validateDevice(compatibleDevice(), status, validDefinition()),
-      /não declara suporte aos níveis on e off/i,
+      hasCode('unsupportedLightingLevels'),
     )
   })
 
@@ -121,7 +146,7 @@ describe('validateDevice', () => {
 
     assert.throws(
       () => validateDevice(compatibleDevice(), validStatus(), definition),
-      /não oferece o comando setLightingLevel/i,
+      hasCode('missingLightingCommand'),
     )
   })
 })

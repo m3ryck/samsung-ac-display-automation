@@ -2,6 +2,8 @@ import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
+import { AppError } from '../errors.js'
+
 export interface ProcessResult {
   exitCode: number
   stdout: string
@@ -16,10 +18,6 @@ export type ProcessExecutor = (
 export interface CliCommandRunner {
   runJson(arguments_: string[]): Promise<unknown>
   run(arguments_: string[]): Promise<string>
-}
-
-export class CliCommandError extends Error {
-  override readonly name = 'CliCommandError'
 }
 
 export interface SmartThingsInvocation {
@@ -106,14 +104,15 @@ export class CliRunner implements CliCommandRunner {
       ])
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      throw new CliCommandError(sanitizeCliError(message))
+      throw new AppError('cliLaunchFailed', { details: sanitizeCliError(message) })
     }
 
     if (result.exitCode !== 0) {
-      const details = result.stderr.trim() || result.stdout.trim() || 'sem detalhes'
-      throw new CliCommandError(
-        sanitizeCliError(`SmartThings CLI terminou com código ${result.exitCode}: ${details}`),
-      )
+      const details = result.stderr.trim() || result.stdout.trim()
+      throw new AppError('cliProcessFailed', {
+        exitCode: result.exitCode,
+        details: sanitizeCliError(details),
+      })
     }
 
     return result.stdout
@@ -124,7 +123,7 @@ export class CliRunner implements CliCommandRunner {
     try {
       return JSON.parse(output.trim()) as unknown
     } catch {
-      throw new CliCommandError('A SmartThings CLI retornou JSON inválido.')
+      throw new AppError('cliInvalidJson')
     }
   }
 }
