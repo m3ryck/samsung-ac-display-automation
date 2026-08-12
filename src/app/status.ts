@@ -1,10 +1,12 @@
 import { findManagedRules, managedRuleDelay } from '../domain/rules.js'
+import type { Translator } from '../i18n/index.js'
 import type { SmartThingsGateway } from '../smartthings/gateway.js'
 import type { Terminal } from '../ui/terminal.js'
 
 export const runStatus = async (
   gateway: SmartThingsGateway,
   terminal: Terminal,
+  translator: Translator,
 ): Promise<number> => {
   const locations = await gateway.listLocations()
   let count = 0
@@ -14,10 +16,17 @@ export const runStatus = async (
       count += 1
       const delay = managedRuleDelay(rule)
       terminal.info(
-        `${location.name}: ${rule.name} — ${delay ?? '?'} segundo(s) de atraso (ID ${rule.id}).`,
+        translator.t('status.entry', {
+          location: location.name,
+          rule: rule.name,
+          delay: delay === undefined
+            ? translator.t('common.unknown')
+            : translator.t('status.delay', { count: delay }),
+          id: rule.id,
+        }),
       )
     }
   }
-  if (!count) terminal.info('Nenhuma configuração criada por este instalador foi encontrada.')
+  if (!count) terminal.info(translator.t('common.noManagedConfigurations'))
   return count
 }

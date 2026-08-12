@@ -123,7 +123,7 @@ export const runSetup = async (
   }
 
   if (await terminal.confirm(translator.t('setup.offerVerification'))) {
-    await verifyInstalledRule(gateway, terminal, device)
+    await verifyInstalledRule(gateway, terminal, translator, device)
   }
   return { outcome, device }
 }

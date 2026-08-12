@@ -1,5 +1,6 @@
 import { LIGHTING_CAPABILITY, deviceDisplayName } from '../domain/devices.js'
 import type { Device, DeviceStatus, StatusValue } from '../domain/types.js'
+import type { Translator } from '../i18n/index.js'
 import type { SmartThingsGateway } from '../smartthings/gateway.js'
 import type { Terminal } from '../ui/terminal.js'
 
@@ -42,6 +43,7 @@ export interface VerificationOptions {
 export const verifyInstalledRule = async (
   gateway: SmartThingsGateway,
   terminal: Terminal,
+  translator: Translator,
   device: Device,
   options: VerificationOptions = {},
 ): Promise<boolean> => {
@@ -53,32 +55,32 @@ export const verifyInstalledRule = async (
   let state = observableState(await gateway.getDeviceStatus(device.deviceId))
   if (state.switchState === 'on') {
     terminal.info(
-      `Desligue ${deviceDisplayName(device)} normalmente. O instalador apenas observará o estado.`,
+      translator.t('verify.turnOff', { device: deviceDisplayName(device) }),
     )
     while (state.switchState !== 'off' && clock.now() < deadline) {
       await clock.wait(pollMilliseconds)
       state = observableState(await gateway.getDeviceStatus(device.deviceId))
     }
     if (state.switchState !== 'off') {
-      terminal.warning('Não foi possível confirmar que o ar-condicionado foi desligado.')
+      terminal.warning(translator.t('verify.turnOffTimeout'))
       return false
     }
   }
 
   terminal.info(
-    `Agora ligue ${deviceDisplayName(device)} normalmente. Aguardarei o visor apagar.`,
+    translator.t('verify.turnOn', { device: deviceDisplayName(device) }),
   )
   while (clock.now() < deadline) {
     state = observableState(await gateway.getDeviceStatus(device.deviceId))
     if (state.switchState === 'on' && state.lightingState === 'off') {
-      terminal.info('O teste funcionou: o ar-condicionado ligou e o visor ficou apagado.')
+      terminal.info(translator.t('verify.success'))
       return true
     }
     await clock.wait(pollMilliseconds)
   }
 
   terminal.warning(
-    'Não foi possível confirmar o funcionamento dentro do tempo limite. Nenhum comando foi enviado ao aparelho.',
+    translator.t('verify.timeout'),
   )
   return false
 }

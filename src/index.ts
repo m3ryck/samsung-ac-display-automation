@@ -27,9 +27,9 @@ const main = async (): Promise<void> => {
     if (command === 'setup' || command === 'update') {
       await runSetup(gateway, terminal, translator, { mode: command })
     } else if (command === 'status') {
-      await runStatus(gateway, terminal)
+      await runStatus(gateway, terminal, translator)
     } else {
-      await runRemove(gateway, terminal)
+      await runRemove(gateway, terminal, translator)
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
