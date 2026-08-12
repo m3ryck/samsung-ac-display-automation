@@ -136,9 +136,9 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
     operation: (path: string) => Promise<T>,
   ): Promise<T> {
     const directory = await mkdtemp(join(this.#temporaryRoot, 'smartthings-display-rule-'))
-    await chmod(directory, 0o700)
     const path = join(directory, 'rule.json')
     try {
+      await chmod(directory, 0o700)
       await writeFile(path, `${JSON.stringify(rule, null, 2)}\n`, {
         encoding: 'utf8',
         mode: 0o600,

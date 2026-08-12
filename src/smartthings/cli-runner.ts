@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 
 export interface ProcessResult {
   exitCode: number
@@ -20,9 +22,23 @@ export class CliCommandError extends Error {
   override readonly name = 'CliCommandError'
 }
 
-export const smartThingsExecutable = (
-  platform: NodeJS.Platform = process.platform,
-): string => (platform === 'win32' ? 'smartthings.cmd' : 'smartthings')
+export interface SmartThingsInvocation {
+  executable: string
+  arguments_: string[]
+}
+
+const smartThingsCliEntryPath = (): string => {
+  const packageEntry = fileURLToPath(import.meta.resolve('@smartthings/cli'))
+  return join(dirname(packageEntry), 'run.js')
+}
+
+export const smartThingsInvocation = (
+  nodeExecutable = process.execPath,
+  cliEntryPath = smartThingsCliEntryPath(),
+): SmartThingsInvocation => ({
+  executable: nodeExecutable,
+  arguments_: [cliEntryPath],
+})
 
 const secretPatterns: Array<[RegExp, string]> = [
   [/(Authorization\s*:\s*Bearer\s+)[^\s"']+/gi, '$1[REDACTED]'],
@@ -61,23 +77,33 @@ const executeProcess: ProcessExecutor = (executable, arguments_) =>
   })
 
 export interface CliRunnerOptions {
-  platform?: NodeJS.Platform
   execute?: ProcessExecutor
+  nodeExecutable?: string
+  cliEntryPath?: string
 }
 
 export class CliRunner implements CliCommandRunner {
   readonly #executable: string
+  readonly #argumentPrefix: string[]
   readonly #execute: ProcessExecutor
 
   constructor(options: CliRunnerOptions = {}) {
-    this.#executable = smartThingsExecutable(options.platform)
+    const invocation = smartThingsInvocation(
+      options.nodeExecutable,
+      options.cliEntryPath,
+    )
+    this.#executable = invocation.executable
+    this.#argumentPrefix = invocation.arguments_
     this.#execute = options.execute ?? executeProcess
   }
 
   async run(arguments_: string[]): Promise<string> {
     let result: ProcessResult
     try {
-      result = await this.#execute(this.#executable, arguments_)
+      result = await this.#execute(this.#executable, [
+        ...this.#argumentPrefix,
+        ...arguments_,
+      ])
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       throw new CliCommandError(sanitizeCliError(message))

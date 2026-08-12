@@ -17,7 +17,7 @@ Maintenance commands provide status, update, and removal. Rules are identified f
 ## Architecture
 
 - A TypeScript command-line application owns prompts and orchestration.
-- A `SmartThingsGateway` interface isolates the application from the official CLI. The production adapter invokes the local `smartthings` executable without a shell and exchanges JSON through temporary files and standard output.
+- A `SmartThingsGateway` interface isolates the application from the official CLI. The production adapter invokes the bundled official CLI JavaScript directly through Node, without a shell, and exchanges JSON through temporary files and standard output.
 - Pure domain modules normalize API responses, find compatible devices, validate capabilities and current status, generate exact Rule JSON, and identify managed Rules.
 - A terminal UI abstraction makes the guided flows deterministic and testable.
 - The official CLI owns Samsung authentication and its local session. This project never requests, reads, stores, or prints SmartThings tokens.

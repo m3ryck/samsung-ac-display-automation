@@ -5,14 +5,15 @@ import {
   CliCommandError,
   CliRunner,
   sanitizeCliError,
-  smartThingsExecutable,
+  smartThingsInvocation,
 } from '../../src/smartthings/cli-runner.js'
 
-describe('smartThingsExecutable', () => {
-  test('uses the npm command shim on Windows and the binary elsewhere', () => {
-    assert.equal(smartThingsExecutable('win32'), 'smartthings.cmd')
-    assert.equal(smartThingsExecutable('darwin'), 'smartthings')
-    assert.equal(smartThingsExecutable('linux'), 'smartthings')
+describe('smartThingsInvocation', () => {
+  test('runs the CLI JavaScript through Node instead of a platform shell shim', () => {
+    assert.deepEqual(smartThingsInvocation('/node', '/cli/run.js'), {
+      executable: '/node',
+      arguments_: ['/cli/run.js'],
+    })
   })
 })
 
@@ -46,7 +47,8 @@ describe('CliRunner', () => {
   test('parses JSON returned by a successful shell-free process execution', async () => {
     const calls: Array<{ executable: string; arguments_: string[] }> = []
     const runner = new CliRunner({
-      platform: 'linux',
+      nodeExecutable: '/node',
+      cliEntryPath: '/cli/run.js',
       execute: async (executable, arguments_) => {
         calls.push({ executable, arguments_ })
         return { exitCode: 0, stdout: '[{"locationId":"location-1"}]', stderr: '' }
@@ -57,7 +59,10 @@ describe('CliRunner', () => {
       { locationId: 'location-1' },
     ])
     assert.deepEqual(calls, [
-      { executable: 'smartthings', arguments_: ['locations', '--json'] },
+      {
+        executable: '/node',
+        arguments_: ['/cli/run.js', 'locations', '--json'],
+      },
     ])
   })
 
