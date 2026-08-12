@@ -1,7 +1,7 @@
 {
   "name": "smartthings-ac-display-rule-installer",
   "version": "0.1.0",
-  "description": "Instalador guiado de uma SmartThings Rule que apaga o visor de ar-condicionados Samsung ao ligar.",
+  "description": "Guided installer for a SmartThings Rule that turns off Samsung air conditioner displays after power-on.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -29,7 +29,8 @@
     "clean": "node --eval \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\""
   },
   "dependencies": {
-    "@smartthings/cli": "^2.1.2"
+    "@smartthings/cli": "^2.1.2",
+    "i18next": "^26.3.6"
   },
   "overrides": {
     "axios": "1.18.0"

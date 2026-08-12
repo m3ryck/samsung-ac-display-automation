@@ -5,6 +5,7 @@ import {
 } from '../domain/devices.js'
 import { buildDisplayOffRule, findManagedRules } from '../domain/rules.js'
 import type { Device, ManagedRule } from '../domain/types.js'
+import type { Translator } from '../i18n/index.js'
 import type { SmartThingsGateway } from '../smartthings/gateway.js'
 import type { Terminal } from '../ui/terminal.js'
 import { selectDevice, selectLocation } from './selection.js'
@@ -17,15 +18,12 @@ export interface SetupResult {
   device: Device
 }
 
-const askDelay = async (terminal: Terminal): Promise<number> => {
+const askDelay = async (terminal: Terminal, translator: Translator): Promise<number> => {
   while (true) {
-    const answer = await terminal.input(
-      'Quantos segundos depois de ligar o ar o visor deve apagar? (0 a 60)',
-      '5',
-    )
+    const answer = await terminal.input(translator.t('setup.delayPrompt'), '5')
     const delay = Number(answer)
     if (Number.isInteger(delay) && delay >= 0 && delay <= 60) return delay
-    terminal.warning('Informe um número inteiro entre 0 e 60.')
+    terminal.warning(translator.t('setup.invalidDelay'))
   }
 }
 
@@ -33,13 +31,14 @@ type ExistingAction = 'keep' | 'replace' | 'remove'
 
 const chooseExistingAction = (
   terminal: Terminal,
+  translator: Translator,
   rules: ManagedRule[],
 ): Promise<ExistingAction> =>
-  terminal.select('Já existe uma configuração para este aparelho. O que deseja fazer?', [
-    { label: 'Manter como está', value: 'keep' },
-    { label: 'Atualizar a configuração', value: 'replace' },
+  terminal.select(translator.t('setup.existingPrompt'), [
+    { label: translator.t('setup.keepOption'), value: 'keep' },
+    { label: translator.t('setup.replaceOption'), value: 'replace' },
     {
-      label: `Remover ${rules.length === 1 ? 'a configuração' : `as ${rules.length} duplicatas`}`,
+      label: translator.t('setup.removeOption', { count: rules.length }),
       value: 'remove',
     },
   ])
@@ -60,20 +59,19 @@ export interface SetupOptions {
 export const runSetup = async (
   gateway: SmartThingsGateway,
   terminal: Terminal,
+  translator: Translator,
   options: SetupOptions = {},
 ): Promise<SetupResult> => {
   terminal.info(
     options.mode === 'update'
-      ? 'Atualização da regra do visor do ar-condicionado.'
-      : 'Configuração da regra do visor do ar-condicionado.',
+      ? translator.t('setup.titleUpdate')
+      : translator.t('setup.titleSetup'),
   )
-  terminal.info(
-    'A regra ficará no SmartThings e continuará funcionando mesmo com este instalador fechado.',
-  )
+  terminal.info(translator.t('setup.cloudPersistence'))
 
-  const location = await selectLocation(gateway, terminal)
+  const location = await selectLocation(gateway, terminal, translator)
   const compatibleDevices = findCompatibleDevices(await gateway.listDevices(location.locationId))
-  const device = await selectDevice(terminal, compatibleDevices)
+  const device = await selectDevice(terminal, translator, compatibleDevices)
   const [status, definition, rules] = await Promise.all([
     gateway.getDeviceStatus(device.deviceId),
     gateway.getLightingCapabilityDefinition(),
@@ -83,32 +81,32 @@ export const runSetup = async (
   const managed = findManagedRules(rules, device.deviceId)
 
   if (managed.length) {
-    const action = await chooseExistingAction(terminal, managed)
+    const action = await chooseExistingAction(terminal, translator, managed)
     if (action === 'keep') {
-      terminal.info('A configuração existente foi mantida. Nenhuma alteração foi feita.')
+      terminal.info(translator.t('setup.kept'))
       return { outcome: 'kept', device }
     }
     if (action === 'remove') {
       const confirmed = await terminal.confirm(
-        `Confirma a remoção de ${managed.length} configuração(ões) do SmartThings?`,
+        translator.t('setup.confirmExistingRemoval', { count: managed.length }),
       )
       if (!confirmed) return { outcome: 'cancelled', device }
       await deleteRules(gateway, managed)
-      terminal.info('Configuração removida. O visor não será mais alterado por esta Rule.')
+      terminal.info(translator.t('setup.existingRemoved'))
       return { outcome: 'removed', device }
     }
   }
 
-  const delay = await askDelay(terminal)
+  const delay = await askDelay(terminal, translator)
   const request = buildDisplayOffRule(device, delay)
-  terminal.info(`Aparelho: ${deviceDisplayName(device)}`)
-  terminal.info(`Estado atual: ar ${current.switchState}; visor ${current.lightingState}.`)
-  terminal.info(
-    `Ação: ao detectar que o ar ligou, aguardar ${delay} segundo(s) e apagar somente o visor.`,
-  )
-  const confirmed = await terminal.confirm('Autoriza salvar esta Rule na sua conta SmartThings?')
+  terminal.info(translator.t('setup.device', { device: deviceDisplayName(device) }))
+  const switchState = translator.t(current.switchState === 'on' ? 'state.on' : 'state.off')
+  const lightingState = translator.t(current.lightingState === 'on' ? 'state.on' : 'state.off')
+  terminal.info(translator.t('setup.currentState', { switchState, lightingState }))
+  terminal.info(translator.t('setup.action', { count: delay }))
+  const confirmed = await terminal.confirm(translator.t('setup.saveConfirmation'))
   if (!confirmed) {
-    terminal.info('Operação cancelada. Nenhuma alteração foi feita.')
+    terminal.info(translator.t('common.cancelled'))
     return { outcome: 'cancelled', device }
   }
 
@@ -117,15 +115,15 @@ export const runSetup = async (
     await gateway.updateRule(location.locationId, managed[0]!.id, request)
     await deleteRules(gateway, managed.slice(1))
     outcome = 'updated'
-    terminal.info('Configuração atualizada sem criar uma Rule duplicada.')
+    terminal.info(translator.t('setup.updated'))
   } else {
     await gateway.createRule(location.locationId, request)
     outcome = 'created'
-    terminal.info('Configuração instalada com sucesso na nuvem do SmartThings.')
+    terminal.info(translator.t('setup.created'))
   }
 
-  if (await terminal.confirm('Deseja fazer agora um teste guiado de até 60 segundos?')) {
-    await verifyInstalledRule(gateway, terminal, device)
+  if (await terminal.confirm(translator.t('setup.offerVerification'))) {
+    await verifyInstalledRule(gateway, terminal, translator, device)
   }
   return { outcome, device }
 }

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 
 import { LIGHTING_CAPABILITY } from '../../src/domain/devices.js'
+import { AppError, type AppErrorCode } from '../../src/errors.js'
 import {
   RULE_MARKER,
   buildDisplayOffRule,
@@ -16,6 +17,9 @@ const device: Device = {
   locationId: 'location-1',
   components: [],
 }
+
+const hasCode = (code: AppErrorCode) => (error: unknown): boolean =>
+  error instanceof AppError && error.code === code
 
 describe('buildDisplayOffRule', () => {
   test('builds the exact transition, delay, and setLightingLevel off action', () => {
@@ -78,7 +82,7 @@ describe('buildDisplayOffRule', () => {
 
   test('rejects delays outside zero through sixty whole seconds', () => {
     for (const delay of [-1, 1.5, 61]) {
-      assert.throws(() => buildDisplayOffRule(device, delay), /entre 0 e 60 segundos/i)
+      assert.throws(() => buildDisplayOffRule(device, delay), hasCode('invalidDelay'))
     }
   })
 })

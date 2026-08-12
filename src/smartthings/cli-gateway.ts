@@ -11,10 +11,20 @@ import type {
   ManagedRule,
   RuleRequest,
 } from '../domain/types.js'
+import { AppError } from '../errors.js'
 import type { CliCommandRunner } from './cli-runner.js'
 import type { SmartThingsGateway } from './gateway.js'
 
-const asList = <T>(value: unknown, description: string): T[] => {
+type CliResource =
+  | 'locations'
+  | 'devices'
+  | 'deviceStatus'
+  | 'lightingCapability'
+  | 'rules'
+  | 'createdRule'
+  | 'updatedRule'
+
+const asList = <T>(value: unknown, resource: CliResource): T[] => {
   if (Array.isArray(value)) return value as T[]
   if (
     typeof value === 'object' &&
@@ -24,14 +34,14 @@ const asList = <T>(value: unknown, description: string): T[] => {
   ) {
     return value.items as T[]
   }
-  throw new Error(`Resposta inválida da SmartThings CLI ao consultar ${description}.`)
+  throw new AppError('invalidCliResponse', { resource })
 }
 
-const asObject = <T>(value: unknown, description: string): T => {
+const asObject = <T>(value: unknown, resource: CliResource): T => {
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
     return value as T
   }
-  throw new Error(`Resposta inválida da SmartThings CLI ao consultar ${description}.`)
+  throw new AppError('invalidCliResponse', { resource })
 }
 
 export interface CliSmartThingsGatewayOptions {
@@ -51,7 +61,7 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
   async listLocations(): Promise<Location[]> {
     return asList<Location>(
       await this.#runner.runJson(['locations', '--json']),
-      'as localizações',
+      'locations',
     )
   }
 
@@ -65,28 +75,28 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
         LIGHTING_CAPABILITY,
         '--json',
       ]),
-      'os dispositivos',
+      'devices',
     )
   }
 
   async getDeviceStatus(deviceId: string): Promise<DeviceStatus> {
     return asObject<DeviceStatus>(
       await this.#runner.runJson(['devices:status', deviceId, '--json']),
-      'o estado do dispositivo',
+      'deviceStatus',
     )
   }
 
   async getLightingCapabilityDefinition(): Promise<CapabilityDefinition> {
     return asObject<CapabilityDefinition>(
       await this.#runner.runJson(['capabilities', LIGHTING_CAPABILITY, '--json']),
-      'a capability de iluminação',
+      'lightingCapability',
     )
   }
 
   async listRules(locationId: string): Promise<ManagedRule[]> {
     const rules = asList<ManagedRule>(
       await this.#runner.runJson(['rules', '--location', locationId, '--json']),
-      'as Rules',
+      'rules',
     )
     return rules.map(rule => ({ ...rule, locationId }))
   }
@@ -102,7 +112,7 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
           path,
           '--json',
         ]),
-        'a Rule criada',
+        'createdRule',
       )
       return { ...created, locationId }
     })
@@ -124,7 +134,7 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
           path,
           '--json',
         ]),
-        'a Rule atualizada',
+        'updatedRule',
       )
       return { ...updated, locationId }
     })

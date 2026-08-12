@@ -1,5 +1,6 @@
 import { findManagedRules } from '../domain/rules.js'
 import type { Location, ManagedRule } from '../domain/types.js'
+import type { Translator } from '../i18n/index.js'
 import type { SmartThingsGateway } from '../smartthings/gateway.js'
 import type { Terminal, TerminalOption } from '../ui/terminal.js'
 
@@ -13,6 +14,7 @@ type RemovalChoice = RuleAtLocation | 'all'
 export const runRemove = async (
   gateway: SmartThingsGateway,
   terminal: Terminal,
+  translator: Translator,
 ): Promise<number> => {
   const entries: RuleAtLocation[] = []
   for (const location of await gateway.listLocations()) {
@@ -21,7 +23,7 @@ export const runRemove = async (
   }
 
   if (!entries.length) {
-    terminal.info('Nenhuma configuração criada por este instalador foi encontrada.')
+    terminal.info(translator.t('common.noManagedConfigurations'))
     return 0
   }
 
@@ -30,27 +32,27 @@ export const runRemove = async (
     selected = entries
   } else {
     const options: Array<TerminalOption<RemovalChoice>> = [
-      { label: `Remover todas as ${entries.length} configurações`, value: 'all' },
+      { label: translator.t('remove.allOption', { count: entries.length }), value: 'all' },
       ...entries.map(entry => ({
         label: `${entry.location.name}: ${entry.rule.name}`,
         value: entry,
       })),
     ]
-    const choice = await terminal.select('Qual configuração deseja remover?', options)
+    const choice = await terminal.select(translator.t('remove.choose'), options)
     selected = choice === 'all' ? entries : [choice]
   }
 
   const confirmed = await terminal.confirm(
-    `Confirma a remoção de ${selected.length} Rule(s) da sua conta SmartThings?`,
+    translator.t('remove.confirm', { count: selected.length }),
   )
   if (!confirmed) {
-    terminal.info('Operação cancelada. Nenhuma alteração foi feita.')
+    terminal.info(translator.t('common.cancelled'))
     return 0
   }
 
   for (const entry of selected) {
     await gateway.deleteRule(entry.location.locationId, entry.rule.id)
   }
-  terminal.info(`${selected.length} configuração(ões) removida(s).`)
+  terminal.info(translator.t('remove.removed', { count: selected.length }))
   return selected.length
 }
