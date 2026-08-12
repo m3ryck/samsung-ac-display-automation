@@ -974,7 +974,7 @@ rtk git commit -m "docs: publish English and Portuguese guides"
 - Consumes: all deliverables from Tasks 1–7.
 - Produces: a clean, buildable, tested bilingual release candidate.
 
-- [ ] **Step 1: Run the complete verification suite from a clean process**
+- [x] **Step 1: Run the complete verification suite from a clean process**
 
 ```bash
 rtk npm test
@@ -987,7 +987,7 @@ rtk git status --short
 
 Expected: tests, typecheck, build, audit, and diff check PASS. Status contains only the plan checkbox update, if performed before the final commit.
 
-- [ ] **Step 2: Verify persisted Rule compatibility explicitly**
+- [x] **Step 2: Verify persisted Rule compatibility explicitly**
 
 Run: `rtk node --import tsx --test tests/domain/rules.test.ts tests/app/setup.test.ts tests/app/maintenance.test.ts`
 
@@ -999,7 +999,7 @@ Request permission before using a real SmartThings account because setup, update
 
 If real-account access or authorization is unavailable, do not simulate or claim this step. Record it explicitly as pending manual acceptance while still reporting the automated verification separately.
 
-- [ ] **Step 4: Review the final diff against the approved specification**
+- [x] **Step 4: Review the final diff against the approved specification**
 
 Run: `rtk git diff HEAD~7 --stat`
 
@@ -1009,7 +1009,7 @@ Run: `rtk git log -8 --oneline`
 
 Expected: one focused implementation commit per task plus the prior design/plan documentation commits.
 
-- [ ] **Step 5: Record completion**
+- [x] **Step 5: Record completion**
 
 Check plan boxes only for steps backed by command output. If checkbox changes are committed separately:
 
