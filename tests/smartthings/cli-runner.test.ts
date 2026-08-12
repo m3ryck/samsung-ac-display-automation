@@ -87,6 +87,21 @@ describe('CliRunner', () => {
     )
   })
 
+  test('omits diagnostic details when an unsuccessful CLI process has no output', async () => {
+    const runner = new CliRunner({
+      execute: async () => ({ exitCode: 23, stdout: '', stderr: '' }),
+    })
+
+    await assert.rejects(
+      runner.runJson(['locations', '--json']),
+      (error: unknown) =>
+        error instanceof AppError &&
+        error.code === 'cliProcessFailed' &&
+        error.details.exitCode === 23 &&
+        !Object.hasOwn(error.details, 'details'),
+    )
+  })
+
   test('stores a sanitized launch failure as structured details', async () => {
     const runner = new CliRunner({
       execute: async () => {

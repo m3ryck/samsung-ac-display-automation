@@ -82,6 +82,7 @@ export const en = {
     cliProcessFailed: 'SmartThings CLI exited with code {{exitCode}}: {{details}}',
     cliInvalidJson: 'The SmartThings CLI returned invalid JSON.',
     unexpected: 'Unexpected error: {{details}}',
+    noDetails: 'No details were provided.',
     resources: {
       locations: 'locations',
       devices: 'devices',
@@ -93,3 +94,11 @@ export const en = {
     },
   },
 } as const
+
+export type WidenStringLeaves<T> = T extends string
+  ? string
+  : T extends object
+    ? { readonly [Key in keyof T]: WidenStringLeaves<T[Key]> }
+    : T
+
+export type TranslationResource = WidenStringLeaves<typeof en>

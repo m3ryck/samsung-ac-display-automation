@@ -1,9 +1,18 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 
-import { createTranslator } from '../../src/i18n/index.js'
+import { createTranslator, type Translator } from '../../src/i18n/index.js'
 import { en } from '../../src/i18n/resources/en.js'
 import { ptBR } from '../../src/i18n/resources/pt-BR.js'
+
+const assertTranslatorTypes = (translator: Translator): void => {
+  // @ts-expect-error nonexistent translation keys must fail type checking
+  translator.t('errors.notARealTranslationKey')
+  // @ts-expect-error interpolation values required by a translation must be present
+  translator.t('setup.device', {})
+}
+
+void assertTranslatorTypes
 
 const leaves = (value: unknown, prefix = ''): string[] => {
   if (typeof value === 'string') return [prefix]
