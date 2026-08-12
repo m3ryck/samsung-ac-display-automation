@@ -60,4 +60,4 @@
 - [x] Add package scripts and distribution metadata without secrets or personal IDs.
 - [x] Document installation and all guided/maintenance flows in Portuguese.
 - [x] Add a three-OS Node 24 CI matrix running typecheck, tests, and build.
-- [ ] Run secret-pattern scan, full tests, type check, build, and inspect the final diff against the design.
+- [x] Run secret-pattern scan, full tests, type check, build, and inspect the final diff against the design.
