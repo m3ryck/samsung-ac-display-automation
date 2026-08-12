@@ -59,3 +59,27 @@ Result: 33 tests passed, 0 failed across 13 suites.
 ## Concerns
 
 None identified for the task contract.
+
+## Fix Round 1
+
+### Changed behavior
+
+Removed the environment-dependent assertion that passed `undefined` as the system locale and expected English. The production behavior remains unchanged: omitting the system-locale argument still uses Node's resolved locale, while the test now verifies deterministic explicit Portuguese detection and English fallback only.
+
+### Covering test files
+
+- `tests/i18n/locale.test.ts`
+
+### Verification
+
+```text
+rtk node --import tsx --test tests/i18n/locale.test.ts
+```
+
+Result: 5 tests passed, 0 failed.
+
+```text
+rtk npm run typecheck
+```
+
+Result: passed (`tsc --noEmit` produced `ok` through the RTK wrapper).

@@ -37,7 +37,6 @@ describe('resolveLanguage', () => {
   test('uses the system locale and then English fallback', () => {
     assert.equal(resolveLanguage(['remove'], 'pt-PT').locale, 'pt-BR')
     assert.equal(resolveLanguage(['remove'], 'es-ES').locale, 'en')
-    assert.equal(resolveLanguage(['remove'], undefined).locale, 'en')
   })
 
   test('rejects missing, unsupported, and duplicate explicit options', () => {
