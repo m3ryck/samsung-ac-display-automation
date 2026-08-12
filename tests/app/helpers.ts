@@ -6,6 +6,8 @@ import type {
   ManagedRule,
   RuleRequest,
 } from '../../src/domain/types.js'
+import { createTranslator, type Translator } from '../../src/i18n/index.js'
+import type { SupportedLocale } from '../../src/i18n/locale.js'
 import type { SmartThingsGateway } from '../../src/smartthings/gateway.js'
 import type { Terminal, TerminalOption } from '../../src/ui/terminal.js'
 
@@ -102,6 +104,8 @@ export class FakeGateway implements SmartThingsGateway {
 
 export class FakeTerminal implements Terminal {
   readonly messages: Array<{ level: 'info' | 'warning' | 'error'; message: string }> = []
+  readonly confirmations: string[] = []
+  readonly inputs: string[] = []
   readonly selections: Array<{ message: string; labels: string[] }> = []
   confirmAnswers: boolean[] = []
   inputAnswers: string[] = []
@@ -119,11 +123,13 @@ export class FakeTerminal implements Terminal {
     this.messages.push({ level: 'error', message })
   }
 
-  async confirm(_message: string, defaultValue = false): Promise<boolean> {
+  async confirm(message: string, defaultValue = false): Promise<boolean> {
+    this.confirmations.push(message)
     return this.confirmAnswers.shift() ?? defaultValue
   }
 
-  async input(_message: string, defaultValue = ''): Promise<string> {
+  async input(message: string, defaultValue = ''): Promise<string> {
+    this.inputs.push(message)
     return this.inputAnswers.shift() ?? defaultValue
   }
 
@@ -136,6 +142,9 @@ export class FakeTerminal implements Terminal {
     return first.value
   }
 }
+
+export const translator = (locale: SupportedLocale): Promise<Translator> =>
+  createTranslator(locale)
 
 export const managedRule = (id = 'rule-1', delaySeconds = 5): ManagedRule => ({
   id,

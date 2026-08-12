@@ -1,6 +1,7 @@
 import { runRemove } from './app/remove.js'
 import { runSetup } from './app/setup.js'
 import { runStatus } from './app/status.js'
+import { createTranslator } from './i18n/index.js'
 import { CliSmartThingsGateway } from './smartthings/cli-gateway.js'
 import { CliRunner, sanitizeCliError } from './smartthings/cli-runner.js'
 import { ConsoleTerminal } from './ui/terminal.js'
@@ -19,11 +20,12 @@ const main = async (): Promise<void> => {
     return
   }
 
-  const terminal = new ConsoleTerminal()
+  const translator = await createTranslator('pt-BR')
+  const terminal = new ConsoleTerminal(translator)
   const gateway = new CliSmartThingsGateway({ runner: new CliRunner() })
   try {
     if (command === 'setup' || command === 'update') {
-      await runSetup(gateway, terminal, { mode: command })
+      await runSetup(gateway, terminal, translator, { mode: command })
     } else if (command === 'status') {
       await runStatus(gateway, terminal)
     } else {
