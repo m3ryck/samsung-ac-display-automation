@@ -10,7 +10,7 @@ import {
 import type { Device, ManagedRule } from '../../src/domain/types.js'
 
 const device: Device = {
-  deviceId: '4f688678-c605-0cc9-6c17-86bebb862f4d',
+  deviceId: 'device-test-1',
   label: 'Ar-condicionado do quarto',
   name: 'Samsung AC',
   locationId: 'location-1',

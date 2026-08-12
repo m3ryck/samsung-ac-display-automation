@@ -84,15 +84,16 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
   }
 
   async listRules(locationId: string): Promise<ManagedRule[]> {
-    return asList<ManagedRule>(
+    const rules = asList<ManagedRule>(
       await this.#runner.runJson(['rules', '--location', locationId, '--json']),
       'as Rules',
     )
+    return rules.map(rule => ({ ...rule, locationId }))
   }
 
   async createRule(locationId: string, rule: RuleRequest): Promise<ManagedRule> {
-    return this.#withRuleInput(rule, async path =>
-      asObject<ManagedRule>(
+    return this.#withRuleInput(rule, async path => {
+      const created = asObject<ManagedRule>(
         await this.#runner.runJson([
           'rules:create',
           '--location',
@@ -102,8 +103,9 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
           '--json',
         ]),
         'a Rule criada',
-      ),
-    )
+      )
+      return { ...created, locationId }
+    })
   }
 
   async updateRule(
@@ -111,8 +113,8 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
     ruleId: string,
     rule: RuleRequest,
   ): Promise<ManagedRule> {
-    return this.#withRuleInput(rule, async path =>
-      asObject<ManagedRule>(
+    return this.#withRuleInput(rule, async path => {
+      const updated = asObject<ManagedRule>(
         await this.#runner.runJson([
           'rules:update',
           ruleId,
@@ -123,8 +125,9 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
           '--json',
         ]),
         'a Rule atualizada',
-      ),
-    )
+      )
+      return { ...updated, locationId }
+    })
   }
 
   async deleteRule(locationId: string, ruleId: string): Promise<void> {

@@ -21,6 +21,7 @@ describe('sanitizeCliError', () => {
   test('redacts bearer tokens and OAuth secret fields without hiding HTTP status codes', () => {
     const raw = [
       'Authorization: Bearer bearer-secret',
+      '"token":"generic-secret"',
       '"access_token":"access-secret"',
       'refresh_token=refresh-secret',
       'client_secret: client-secret',
@@ -32,6 +33,7 @@ describe('sanitizeCliError', () => {
 
     for (const secret of [
       'bearer-secret',
+      'generic-secret',
       'access-secret',
       'refresh-secret',
       'client-secret',

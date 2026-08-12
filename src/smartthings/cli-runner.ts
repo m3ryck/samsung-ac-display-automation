@@ -42,7 +42,7 @@ export const smartThingsInvocation = (
 
 const secretPatterns: Array<[RegExp, string]> = [
   [/(Authorization\s*:\s*Bearer\s+)[^\s"']+/gi, '$1[REDACTED]'],
-  [/(\"?(?:access_token|refresh_token|client_secret|authorization_code)\"?\s*[:=]\s*\"?)[^\s\",'&}]+/gi, '$1[REDACTED]'],
+  [/(\"?(?:token|access_token|refresh_token|client_secret|authorization_code)\"?\s*[:=]\s*\"?)[^\s\",'&}]+/gi, '$1[REDACTED]'],
 ]
 
 export const sanitizeCliError = (message: string): string =>

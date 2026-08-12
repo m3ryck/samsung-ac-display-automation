@@ -49,7 +49,10 @@ describe('CliSmartThingsGateway', () => {
     assert.equal((await gateway.listDevices('location-1'))[0]?.deviceId, 'device-1')
     await gateway.getDeviceStatus('device-1')
     await gateway.getLightingCapabilityDefinition()
-    assert.equal((await gateway.listRules('location-1'))[0]?.id, 'rule-1')
+    assert.deepEqual((await gateway.listRules('location-1'))[0], {
+      id: 'rule-1',
+      locationId: 'location-1',
+    })
 
     assert.deepEqual(runner.calls, [
       { mode: 'json', arguments_: ['locations', '--json'] },
@@ -86,6 +89,7 @@ describe('CliSmartThingsGateway', () => {
     try {
       const created = await gateway.createRule('location-1', ruleRequest)
       assert.equal(created.id, 'rule-1')
+      assert.equal(created.locationId, 'location-1')
       assert.deepEqual(await readdir(temporaryRoot), [])
       assert.equal(runner.calls[0]?.arguments_[0], 'rules:create')
     } finally {
@@ -100,9 +104,10 @@ describe('CliSmartThingsGateway', () => {
     const gateway = new CliSmartThingsGateway({ runner, temporaryRoot })
 
     try {
-      await gateway.updateRule('location-1', 'rule-1', ruleRequest)
+      const updated = await gateway.updateRule('location-1', 'rule-1', ruleRequest)
       await gateway.deleteRule('location-1', 'rule-1')
 
+      assert.equal(updated.locationId, 'location-1')
       assert.deepEqual(runner.calls.map(call => call.arguments_.slice(0, 4)), [
         ['rules:update', 'rule-1', '--location', 'location-1'],
         ['rules:delete', 'rule-1', '--location', 'location-1'],
