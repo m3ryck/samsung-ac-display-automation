@@ -1,36 +1,47 @@
-# Apagar o visor do ar-condicionado Samsung
+# Turn off the Samsung air conditioner display
 
-Instalador guiado e open source que cria uma **Rule na sua própria conta SmartThings**. Sempre que o ar-condicionado muda para ligado, a Rule aguarda cinco segundos (valor configurável) e envia somente:
+**English** | [Português (Brasil)](README.pt-BR.md)
+
+An open-source guided installer that creates a **Rule in your own SmartThings account**. Whenever the air conditioner changes to on, the Rule waits five seconds (a configurable value) and sends only:
 
 ```text
 samsungce.airConditionerLighting.setLightingLevel("off")
 ```
 
-Você executa o instalador uma vez. Depois disso, a automação permanece no SmartThings e funciona sem computador ligado, servidor, Alexa Skill, AWS, Home Assistant ou mensalidade deste projeto.
+You run the installer once. Afterwards, the automation remains in SmartThings and works without a computer left on, server, Alexa Skill, AWS, Home Assistant, or subscription for this project.
 
-## O que esta v1 faz
+## What this v1 does
 
-- encontra automaticamente casas e aparelhos compatíveis;
-- exige `switch` e `samsungce.airConditionerLighting` no componente `main`;
-- valida que o aparelho aceita `on`, `off` e `setLightingLevel`;
-- cria uma Rule acionada apenas na transição do ar para `on`;
-- evita Rules duplicadas e permite consultar, atualizar ou remover a instalação;
-- oferece um teste opcional que apenas observa o estado — o instalador nunca liga ou desliga o ar.
+- automatically finds compatible locations and devices;
+- requires `switch` and `samsungce.airConditionerLighting` on the `main` component;
+- validates that the device accepts `on`, `off`, and `setLightingLevel`;
+- creates a Rule triggered only when the air conditioner transitions to `on`;
+- prevents duplicate Rules and lets you view, update, or remove the installation;
+- offers an optional test that only observes state — the installer never turns the air conditioner on or off.
 
-Ela não controla temperatura, modo, ventilação nem o estado ligado/desligado do aparelho.
+It does not control the device's temperature, mode, fan, or on/off state.
 
-## Requisitos
+## Language
 
-- ar-condicionado Samsung já adicionado e on-line no aplicativo SmartThings;
-- a função de iluminação/visor disponível na tela do aparelho no SmartThings;
-- Windows, macOS ou Linux com acesso a um navegador;
-- [Node.js 24.8.0 ou mais recente](https://nodejs.org/en/download).
+By default, the installer uses the system language: any Portuguese variant uses Brazilian Portuguese, English variants use English, and other languages fall back to English. To override that selection for any command, use `--lang en` or `--lang pt-BR`. Both of the following forms are accepted:
 
-Não é necessário criar token, descobrir `deviceId`, configurar OAuth, editar `.env` ou possuir conta AWS.
+```bash
+npm run setup -- --lang en
+npm run status -- --lang=en
+```
 
-## Instalação guiada
+## Requirements
 
-### Opção 1: usando Git
+- a Samsung air conditioner already added and online in the SmartThings app;
+- the lighting/display feature available on the device screen in SmartThings;
+- Windows, macOS, or Linux with access to a browser;
+- [Node.js 24.8.0 or later](https://nodejs.org/en/download).
+
+You do not need to create a token, find a `deviceId`, configure OAuth, edit `.env`, or have an AWS account.
+
+## Guided installation
+
+### Option 1: using Git
 
 ```bash
 git clone https://github.com/m3ryck/skill-smartthings.git
@@ -39,30 +50,30 @@ npm install
 npm run setup
 ```
 
-### Opção 2: baixando um ZIP
+### Option 2: downloading a ZIP
 
-1. Na página do projeto, escolha **Code → Download ZIP**.
-2. Extraia o arquivo e abra um terminal dentro da pasta extraída.
-3. Execute:
+1. On the project page, choose **Code → Download ZIP**.
+2. Extract the file and open a terminal inside the extracted folder.
+3. Run:
 
 ```bash
 npm install
 npm run setup
 ```
 
-Na primeira consulta, a CLI oficial do SmartThings abre o navegador. Entre com a conta Samsung que possui o ar-condicionado e autorize o acesso. O assistente então:
+On the first request, the official SmartThings CLI opens the browser. Sign in with the Samsung account that owns the air conditioner and authorize access. The assistant then:
 
-1. seleciona automaticamente uma única casa e um único aparelho compatível, ou pede sua escolha;
-2. mostra o aparelho, o estado atual e a ação exata;
-3. permite escolher um atraso inteiro entre 0 e 60 segundos (padrão: 5);
-4. pede confirmação antes de criar ou alterar qualquer Rule;
-5. oferece um teste guiado de até 60 segundos.
+1. automatically selects a single location and compatible device, or asks you to choose;
+2. displays the device, current state, and exact action;
+3. lets you choose a whole-second delay between 0 and 60 seconds (default: 5);
+4. asks for confirmation before creating or changing any Rule;
+5. offers a guided test of up to 60 seconds.
 
-Ao final, pode fechar o terminal e até remover esta pasta. **Não é preciso executar novamente a cada vez que ligar o ar.**
+When finished, you can close the terminal and even remove this folder. **You do not need to run it again every time you turn on the air conditioner.**
 
-## Manutenção
+## Maintenance
 
-Execute os comandos dentro da pasta do projeto:
+Run the commands inside the project folder:
 
 ```bash
 npm run status
@@ -70,21 +81,21 @@ npm run update
 npm run remove
 ```
 
-- `status` lista apenas as Rules identificadas como criadas por este instalador;
-- `update` revê ou altera o atraso do aparelho selecionado sem criar uma duplicata;
-- `remove` pede confirmação e exclui a Rule selecionada ou todas as Rules deste projeto.
+- `status` lists only the Rules identified as created by this installer;
+- `update` reviews or changes the selected device's delay without creating a duplicate;
+- `remove` asks for confirmation and deletes the selected Rule or every Rule from this project.
 
-É possível fazer manutenção a partir de uma nova cópia do repositório. Nenhum estado é salvo na pasta do projeto: a identificação fica nos metadados da própria Rule.
+You can perform maintenance from a fresh copy of the repository. No state is saved in the project folder: identification is stored in the Rule's own metadata.
 
-Para também encerrar a sessão local da CLI oficial depois de remover a Rule:
+To also end the official CLI's local session after removing the Rule:
 
 ```bash
 npx smartthings logout
 ```
 
-## Como funciona
+## How it works
 
-A Rule criada equivale a:
+A created Rule is equivalent to:
 
 ```json
 {
@@ -128,76 +139,76 @@ A Rule criada equivale a:
 }
 ```
 
-`changes` evita repetir o comando enquanto o ar simplesmente permanece ligado. A documentação oficial confirma que Rules servem para automações “configure e esqueça”, que ações podem aguardar e executar comandos e que capabilities personalizadas podem ser usadas em Rules:
+`changes` prevents repeating the command while the air conditioner simply remains on. The official documentation confirms that Rules are for “set and forget” automations, actions can wait and execute commands, and custom capabilities can be used in Rules:
 
 - [SmartThings Rules](https://developer.smartthings.com/docs/automations/rules)
 - [SmartThings Custom Capabilities](https://developer.smartthings.com/docs/devices/capabilities/custom-capabilities)
-- [SmartThings CLI oficial](https://github.com/SmartThingsCommunity/smartthings-cli)
+- [Official SmartThings CLI](https://github.com/SmartThingsCommunity/smartthings-cli)
 
-Esta arquitetura é deliberadamente mais simples que uma Alexa Skill pública: não existe backend mantido pelo autor, custo por invocação ou banco de tokens de usuários. A desvantagem é a configuração inicial local com Node.js e terminal.
+This architecture is deliberately simpler than a public Alexa Skill: there is no author-maintained backend, per-invocation cost, or user-token database. The tradeoff is the initial local setup with Node.js and a terminal.
 
-## Segurança e privacidade
+## Security and privacy
 
-- O projeto usa a CLI oficial `@smartthings/cli`, que realiza o login pelo navegador quando necessário.
-- Este código não solicita, recebe, armazena ou imprime tokens SmartThings.
-- Não há token global, `deviceId` fixo, telemetria ou servidor do projeto.
-- A CLI é executada diretamente pelo Node, sem shell e com argumentos separados, inclusive no Windows.
-- O JSON temporário da Rule usa permissão restrita e é apagado mesmo quando uma operação falha.
-- Mensagens de erro têm campos comuns de token e autorização censurados.
-- Toda alteração e remoção exige confirmação explícita.
-- A dependência HTTP da CLI é resolvida para uma versão 1.x corrigida; o CI executa testes e auditoria de segurança.
+- The project uses the official `@smartthings/cli`, which signs in through the browser when needed.
+- This code does not request, receive, store, or print SmartThings tokens.
+- There is no global token, fixed `deviceId`, telemetry, or project server.
+- The CLI is run directly by Node, without a shell and with separate arguments, including on Windows.
+- The Rule's temporary JSON has restricted permission and is deleted even when an operation fails.
+- Error messages redact common token and authorization fields.
+- Every change and removal requires explicit confirmation.
+- The CLI's HTTP dependency is resolved to a fixed 1.x version; CI runs tests and a security audit.
 
-A sessão de autenticação fica sob responsabilidade e no perfil local da própria CLI oficial. Use `npx smartthings logout` para desvinculá-la daquele computador.
+The authentication session is managed by and stored in the official CLI's local profile. Use `npx smartthings logout` to unlink it from that computer.
 
-## Solução de problemas
+## Troubleshooting
 
-### O navegador não abriu ou o login expirou
+### The browser did not open or the login expired
 
-Encerre a sessão e repita a configuração:
+End the session and repeat the setup:
 
 ```bash
 npx smartthings logout
 npm run setup
 ```
 
-Não cole um Personal Access Token no projeto. A documentação atual considera PAT apropriado para testes de curta duração e recomenda OAuth 2.0 para integrações duradouras; neste instalador, o fluxo de navegador pertence à CLI oficial. Consulte [Authorization and Permissions](https://developer.smartthings.com/docs/getting-started/authorization-and-permissions).
+Do not paste a Personal Access Token into the project. Current documentation considers a PAT appropriate for short-lived tests and recommends OAuth 2.0 for long-lived integrations; in this installer, the browser flow belongs to the official CLI. See [Authorization and Permissions](https://developer.smartthings.com/docs/getting-started/authorization-and-permissions).
 
-### Nenhum aparelho compatível foi encontrado
+### No compatible device was found
 
-Confirme no aplicativo SmartThings que:
+Confirm in the SmartThings app that:
 
-- o aparelho está on-line e na mesma conta usada no navegador;
-- a tela do aparelho possui o controle de iluminação/visor;
-- o perfil do dispositivo expõe `switch` e `samsungce.airConditionerLighting` em `main`.
+- the device is online and in the same account used in the browser;
+- the device screen has the lighting/display control;
+- the device profile exposes `switch` and `samsungce.airConditionerLighting` on `main`.
 
-O nome ou modelo do aparelho não é usado como critério principal.
+The device name or model is not used as the primary criterion.
 
-### Erros 401 ou 403
+### 401 or 403 errors
 
-A sessão pode ter expirado ou a autorização pode ter sido negada. Execute `npx smartthings logout` e tente outra vez, autorizando a conta correta.
+The session may have expired or authorization may have been denied. Run `npx smartthings logout` and try again, authorizing the correct account.
 
-### Erro 404
+### 404 error
 
-O aparelho ou a Rule pode ter sido removido ou recriado no SmartThings. Rode `npm run status`; se necessário, remova a configuração antiga e execute `npm run setup` novamente.
+The device or Rule may have been removed or recreated in SmartThings. Run `npm run status`; if needed, remove the old configuration and run `npm run setup` again.
 
-### Erro 429, timeout ou erro 5xx
+### 429, timeout, or 5xx error
 
-A API do SmartThings pode estar limitando chamadas ou indisponível. Aguarde alguns minutos e repita. Uma falha no teste opcional não remove uma Rule que já tenha sido criada com sucesso.
+The SmartThings API may be rate-limiting requests or unavailable. Wait a few minutes and try again. A failure in the optional test does not remove a Rule that was already created successfully.
 
-## Teste manual de aceitação
+## Manual acceptance test
 
-Depois de `npm run setup`:
+After `npm run setup`:
 
-1. desligue o ar-condicionado e aguarde o SmartThings mostrar `off`;
-2. ligue pelo aplicativo SmartThings;
-3. confirme que o visor apaga após o atraso escolhido;
-4. repita ligando pelo controle remoto físico;
-5. se já controlar o ar pela Alexa, repita ligando por voz;
-6. feche o instalador ou desligue o computador e repita o teste.
+1. turn off the air conditioner and wait for SmartThings to show `off`;
+2. turn it on from the SmartThings app;
+3. confirm that the display turns off after the selected delay;
+4. repeat by turning it on with the physical remote control;
+5. if you already control the air conditioner with Alexa, repeat by turning it on by voice;
+6. close the installer or turn off the computer and repeat the test.
 
-O resultado esperado é o mesmo em todos os casos porque a Rule reage ao estado informado pelo aparelho no SmartThings, não à origem do comando.
+The expected result is the same in all cases because the Rule reacts to the state reported by the device in SmartThings, not to the command's origin.
 
-## Desenvolvimento
+## Development
 
 ```bash
 npm ci
@@ -207,8 +218,8 @@ npm run build
 npm audit
 ```
 
-Os testes não acessam uma conta real: usam gateways e terminais falsos. O teste ponta a ponta com um aparelho real é necessariamente manual para evitar qualquer alteração em contas durante o CI.
+The tests do not access a real account: they use fake gateways and terminals. End-to-end testing with a real device must be manual to avoid changing accounts during CI.
 
-## Licença
+## License
 
 [MIT](LICENSE)
