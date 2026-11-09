@@ -23,50 +23,50 @@ const hasCode = (code: AppErrorCode) => (error: unknown): boolean =>
 
 describe('buildDisplayOffRule', () => {
   test('builds the exact transition, delay, and setLightingLevel off action', () => {
-    assert.deepEqual(buildDisplayOffRule(device, 5), {
-      name: `${RULE_MARKER} Ar-condicionado do quarto`,
-      description: `${RULE_MARKER};version=1;deviceId=${device.deviceId};delaySeconds=5`,
-      actions: [
-        {
-          if: {
-            changes: {
-              id: 'air-conditioner-turned-on',
-              equals: {
-                left: {
-                  device: {
-                    devices: [device.deviceId],
-                    component: 'main',
-                    capability: 'switch',
-                    attribute: 'switch',
-                    trigger: 'Always',
-                  },
-                },
-                right: { string: 'on' },
+    const rule = buildDisplayOffRule(device, 5)
+    assert.deepEqual(rule.actions[0], {
+      if: {
+        changes: {
+          id: 'air-conditioner-turned-on',
+          equals: {
+            left: {
+              device: {
+                devices: [device.deviceId],
+                component: 'main',
+                capability: 'switch',
+                attribute: 'switch',
+                trigger: 'Always',
               },
             },
-            then: [
-              {
-                sleep: {
-                  duration: { value: { integer: 5 }, unit: 'Second' },
-                },
-              },
-              {
-                command: {
-                  devices: [device.deviceId],
-                  commands: [
-                    {
-                      component: 'main',
-                      capability: LIGHTING_CAPABILITY,
-                      command: 'setLightingLevel',
-                      arguments: [{ string: 'off' }],
-                    },
-                  ],
-                },
-              },
-            ],
+            right: { string: 'on' },
           },
         },
-      ],
+        then: [
+          {
+            sleep: {
+              duration: { value: { integer: 5 }, unit: 'Second' },
+            },
+          },
+          {
+            command: {
+              devices: [device.deviceId],
+              commands: [
+                {
+                  component: 'main',
+                  capability: LIGHTING_CAPABILITY,
+                  command: 'setLightingLevel',
+                  arguments: [{ string: 'off' }],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    })
+    assert.deepEqual(rule, {
+      name: `${RULE_MARKER} Ar-condicionado do quarto`,
+      description: `${RULE_MARKER};version=1;deviceId=${device.deviceId};delaySeconds=5`,
+      actions: [rule.actions[0], rule.actions[1]],
     })
   })
 
@@ -78,6 +78,22 @@ describe('buildDisplayOffRule', () => {
 
     assert.equal(condition.then.length, 1)
     assert.ok('command' in condition.then[0]!)
+  })
+
+  test('also turns display off when remote control turns display on', () => {
+    const rule = buildDisplayOffRule(device, 5)
+    assert.equal(rule.actions.length, 2)
+    const displayTrigger = rule.actions[1]
+    assert.ok(displayTrigger && 'if' in displayTrigger)
+    assert.deepEqual(displayTrigger.if.changes.equals.left, {
+      device: {
+        devices: [device.deviceId],
+        component: 'main',
+        capability: LIGHTING_CAPABILITY,
+        attribute: 'lighting',
+        trigger: 'Always',
+      },
+    })
   })
 
   test('rejects delays outside zero through sixty whole seconds', () => {

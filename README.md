@@ -20,6 +20,7 @@ You run the installer once. Afterwards, the automation remains in SmartThings an
 - offers an optional test that only observes state — the installer never turns the air conditioner on or off.
 
 It does not control the device's temperature, mode, fan, or on/off state.
+It also reacts when the display turns on again, including after a change made with the physical remote.
 
 ## Language
 

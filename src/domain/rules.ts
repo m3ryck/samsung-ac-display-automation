@@ -38,30 +38,33 @@ export const buildDisplayOffRule = (device: Device, delaySeconds: number): RuleR
       ]
     : [commandAction]
 
+  const displayOffCondition = (id: string, capability: string, attribute: string): RuleAction => ({
+    if: {
+      changes: {
+        id,
+        equals: {
+          left: {
+            device: {
+              devices: [device.deviceId],
+              component: 'main',
+              capability,
+              attribute,
+              trigger: 'Always',
+            },
+          },
+          right: { string: 'on' },
+        },
+      },
+      then,
+    },
+  })
+
   return {
     name: `${RULE_MARKER} ${deviceDisplayName(device)}`.slice(0, 100),
     description: buildDescription(device.deviceId, delaySeconds),
     actions: [
-      {
-        if: {
-          changes: {
-            id: 'air-conditioner-turned-on',
-            equals: {
-              left: {
-                device: {
-                  devices: [device.deviceId],
-                  component: 'main',
-                  capability: 'switch',
-                  attribute: 'switch',
-                  trigger: 'Always',
-                },
-              },
-              right: { string: 'on' },
-            },
-          },
-          then,
-        },
-      },
+      displayOffCondition('air-conditioner-turned-on', 'switch', 'switch'),
+      displayOffCondition('air-conditioner-display-turned-on', LIGHTING_CAPABILITY, 'lighting'),
     ],
   }
 }

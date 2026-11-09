@@ -20,6 +20,7 @@ Você executa o instalador uma vez. Depois disso, a automação permanece no Sma
 - oferece um teste opcional que apenas observa o estado — o instalador nunca liga ou desliga o ar.
 
 Ela não controla temperatura, modo, ventilação nem o estado ligado/desligado do aparelho.
+Também reage quando o visor volta a ligar, inclusive após uma mudança feita pelo controle remoto físico.
 
 ## Idioma
 
