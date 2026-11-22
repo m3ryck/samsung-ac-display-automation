@@ -49,7 +49,7 @@ export interface DeviceOperand {
   component: string
   capability: string
   attribute: string
-  trigger: 'Always'
+  trigger: 'Always' | 'Never'
 }
 
 export type RuleOperand =
@@ -84,8 +84,11 @@ export type RuleAction =
       command: { devices: string[]; commands: RuleCommand[] }
     }
   | {
-      if: {
-        changes: RuleChangesCondition
+      if: (
+        | { changes: RuleChangesCondition }
+        | { equals: RuleEqualsCondition }
+        | { lessThanOrEquals: RuleEqualsCondition }
+      ) & {
         then: RuleAction[]
       }
     }

@@ -1,6 +1,7 @@
 import {
   deviceDisplayName,
   findCompatibleDevices,
+  hasCoolingSetpoint,
   validateDevice,
 } from '../domain/devices.js'
 import { buildDisplayOffRule, findManagedRules } from '../domain/rules.js'
@@ -98,7 +99,9 @@ export const runSetup = async (
   }
 
   const delay = await askDelay(terminal, translator)
-  const request = buildDisplayOffRule(device, delay)
+  const useCoolingSetpoint = hasCoolingSetpoint(device) &&
+    await terminal.confirm(translator.t('setup.coolingSetpointPrompt'))
+  const request = buildDisplayOffRule(device, delay, useCoolingSetpoint)
   terminal.info(translator.t('setup.device', { device: deviceDisplayName(device) }))
   const switchState = translator.t(current.switchState === 'on' ? 'state.on' : 'state.off')
   const lightingState = translator.t(current.lightingState === 'on' ? 'state.on' : 'state.off')

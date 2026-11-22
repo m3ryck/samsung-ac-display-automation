@@ -38,6 +38,7 @@ export const ptBR = {
     cloudPersistence: 'A Rule ficará no SmartThings e continuará funcionando mesmo com este instalador fechado.',
     delayPrompt: 'Quantos segundos depois de ligar o ar o visor deve apagar? (0 a 60)',
     invalidDelay: 'Informe um número inteiro entre 0 e 60.',
+    coolingSetpointPrompt: 'Usar mudanças na temperatura ajustada de refrigeração no lugar do evento de iluminação? O mesmo atraso será aplicado. Opção experimental para modelos como o AR12DXFAAWKNAZ.',
     existingPrompt: 'Já existe uma configuração para este aparelho. O que deseja fazer?',
     keepOption: 'Manter como está',
     replaceOption: 'Atualizar a configuração',

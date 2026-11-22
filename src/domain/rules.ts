@@ -1,4 +1,4 @@
-import { LIGHTING_CAPABILITY, deviceDisplayName } from './devices.js'
+import { COOLING_SETPOINT_CAPABILITY, LIGHTING_CAPABILITY, deviceDisplayName } from './devices.js'
 import { AppError } from '../errors.js'
 import type { Device, ManagedRule, RuleAction, RuleRequest } from './types.js'
 
@@ -8,7 +8,11 @@ export const RULE_VERSION = 1
 const buildDescription = (deviceId: string, delaySeconds: number): string =>
   `${RULE_MARKER};version=${RULE_VERSION};deviceId=${deviceId};delaySeconds=${delaySeconds}`
 
-export const buildDisplayOffRule = (device: Device, delaySeconds: number): RuleRequest => {
+export const buildDisplayOffRule = (
+  device: Device,
+  delaySeconds: number,
+  useCoolingSetpoint = false,
+): RuleRequest => {
   if (!Number.isInteger(delaySeconds) || delaySeconds < 0 || delaySeconds > 60) {
     throw new AppError('invalidDelay')
   }
@@ -59,12 +63,46 @@ export const buildDisplayOffRule = (device: Device, delaySeconds: number): RuleR
     },
   })
 
+  const setpointAction: RuleAction = {
+    if: {
+      // Every reported setpoint in the normal AC range can trigger execution.
+      lessThanOrEquals: {
+        left: { integer: 0 },
+        right: { device: {
+          devices: [device.deviceId],
+          component: 'main',
+          capability: COOLING_SETPOINT_CAPABILITY,
+          attribute: 'coolingSetpoint',
+          trigger: 'Always',
+        } },
+      },
+      then: [
+        ...then.slice(0, -1),
+        { if: {
+          equals: {
+            left: { device: {
+              devices: [device.deviceId],
+              component: 'main',
+              capability: 'switch',
+              attribute: 'switch',
+              trigger: 'Never',
+            } },
+            right: { string: 'on' },
+          },
+          then: [commandAction],
+        } },
+      ],
+    },
+  }
+
   return {
     name: `${RULE_MARKER} ${deviceDisplayName(device)}`.slice(0, 100),
     description: buildDescription(device.deviceId, delaySeconds),
     actions: [
       displayOffCondition('air-conditioner-turned-on', 'switch', 'switch'),
-      displayOffCondition('air-conditioner-display-turned-on', LIGHTING_CAPABILITY, 'lighting'),
+      useCoolingSetpoint
+        ? setpointAction
+        : displayOffCondition('air-conditioner-display-turned-on', LIGHTING_CAPABILITY, 'lighting'),
     ],
   }
 }

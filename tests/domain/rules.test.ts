@@ -85,6 +85,7 @@ describe('buildDisplayOffRule', () => {
     assert.equal(rule.actions.length, 2)
     const displayTrigger = rule.actions[1]
     assert.ok(displayTrigger && 'if' in displayTrigger)
+    assert.ok('changes' in displayTrigger.if)
     assert.deepEqual(displayTrigger.if.changes.equals.left, {
       device: {
         devices: [device.deviceId],

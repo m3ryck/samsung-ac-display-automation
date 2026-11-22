@@ -32,6 +32,8 @@ npm run test-display -- --lang pt-BR
 
 O teste permite escolher o aparelho e pede autorização antes de enviar `setLightingLevel("off")`. Confirme o resultado olhando para o visor físico. O teste não cria nem atualiza Rules. Se o visor não apagar, o suporte ao comando ainda não foi confirmado, mesmo que a CLI conclua o envio.
 
+Se o teste apagar o visor, rode `npm run setup` (ou `npm run update` para uma Rule instalada), selecione o aparelho e aceite a opção experimental de temperatura ajustada. O instalador oferece essa opção quando o aparelho declara `thermostatCoolingSetpoint`. A Rule continua apagando o visor ao ligar o ar e usa os eventos de temperatura ajustada de refrigeração no lugar dos eventos de iluminação. Para validar com o controle físico, altere a temperatura com o ar ligado e veja se o visor apaga após o atraso configurado.
+
 ## Idioma
 
 Por padrão, o instalador usa o idioma do sistema: qualquer variante de português usa Português (Brasil), variantes de inglês usam inglês e outros idiomas usam inglês como alternativa. Para substituir essa escolha em qualquer comando, use `--lang en` ou `--lang pt-BR`. As duas sintaxes a seguir são aceitas:

@@ -69,6 +69,7 @@ const messages = (terminal: FakeTerminal): string[] =>
 const assertRawRuleStates = (rule: RuleRequest): void => {
   const firstAction = rule.actions[0]
   assert.ok(firstAction && 'if' in firstAction)
+  assert.ok('changes' in firstAction.if)
   assert.deepEqual(firstAction.if.changes.equals.right, { string: 'on' })
   const lastAction = firstAction.if.then.at(-1)
   assert.ok(lastAction && 'command' in lastAction)
@@ -76,6 +77,55 @@ const assertRawRuleStates = (rule: RuleRequest): void => {
 }
 
 describe('runSetup', () => {
+  test('uses cooling setpoint instead of the lighting event when opted in', async () => {
+    const gateway = new FakeGateway()
+    gateway.devices = [{
+      ...device,
+      components: [{
+        id: 'main',
+        capabilities: [...device.components[0]!.capabilities, { id: 'thermostatCoolingSetpoint' }],
+      }],
+    }]
+    const terminal = new FakeTerminal()
+    terminal.confirmAnswers = [true, true, false]
+
+    await runSetup(gateway, terminal, await translator('pt-BR'))
+
+    const rule = gateway.created[0]!.rule
+    assertRawRuleStates(rule)
+    assert.equal(rule.actions.length, 2)
+    assert.deepEqual(rule.actions[1], {
+      if: {
+        lessThanOrEquals: {
+          left: { integer: 0 },
+          right: { device: {
+            devices: [device.deviceId], component: 'main',
+            capability: 'thermostatCoolingSetpoint', attribute: 'coolingSetpoint', trigger: 'Always',
+          } },
+        },
+        then: [
+          { sleep: { duration: { value: { integer: 5 }, unit: 'Second' } } },
+          { if: {
+            equals: {
+              left: { device: {
+                devices: [device.deviceId], component: 'main',
+                capability: 'switch', attribute: 'switch', trigger: 'Never',
+              } },
+              right: { string: 'on' },
+            },
+            then: [{ command: {
+              devices: [device.deviceId],
+              commands: [{
+                component: 'main', capability: 'samsungce.airConditionerLighting',
+                command: 'setLightingLevel', arguments: [{ string: 'off' }],
+              }],
+            } }],
+          } },
+        ],
+      },
+    })
+  })
+
   for (const copy of locales) {
     test(`reports typed selection errors through the ${copy.locale} flow`, async () => {
       const t = await translator(copy.locale)

@@ -32,6 +32,8 @@ npm run test-display -- --lang en
 
 The test lets you select the device and asks for confirmation before sending `setLightingLevel("off")`. Check the result on the physical display. The test does not create or update Rules. If the display stays lit, command support remains unconfirmed even if the CLI finishes sending it.
 
+If the test turns the display off, run `npm run setup` (or `npm run update` for an installed Rule), select the device, and enable the experimental cooling setpoint option. The installer offers it on devices that declare `thermostatCoolingSetpoint`. The Rule still turns off the display at power-on and uses cooling setpoint events in place of display lighting events. To verify with the physical remote, change the setpoint while the AC is running and check that the display goes off after the configured delay.
+
 ## Language
 
 By default, the installer uses the system language: any Portuguese variant uses Brazilian Portuguese, English variants use English, and other languages fall back to English. To override that selection for any command, use `--lang en` or `--lang pt-BR`. Both of the following forms are accepted:

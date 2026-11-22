@@ -8,11 +8,15 @@ import type {
 import { AppError } from '../errors.js'
 
 export const LIGHTING_CAPABILITY = 'samsungce.airConditionerLighting'
+export const COOLING_SETPOINT_CAPABILITY = 'thermostatCoolingSetpoint'
 
 const mainCapabilities = (device: Device): Set<string> => {
   const main = device.components.find(component => component.id === 'main')
   return new Set(main?.capabilities.map(capability => capability.id) ?? [])
 }
+
+export const hasCoolingSetpoint = (device: Device): boolean =>
+  mainCapabilities(device).has(COOLING_SETPOINT_CAPABILITY)
 
 export const findCompatibleDevices = (devices: Device[]): Device[] =>
   devices.filter(device => {

@@ -36,6 +36,7 @@ export const en = {
     cloudPersistence: 'The Rule will remain in SmartThings and continue working when this installer is closed.',
     delayPrompt: 'How many seconds after the air conditioner turns on should the display turn off? (0 to 60)',
     invalidDelay: 'Enter a whole number from 0 to 60.',
+    coolingSetpointPrompt: 'Use cooling setpoint changes instead of the display lighting event? The same delay will apply. Experimental option for models such as the AR12DXFAAWKNAZ.',
     existingPrompt: 'A configuration already exists for this device. What would you like to do?',
     keepOption: 'Keep it as it is',
     replaceOption: 'Update the configuration',
