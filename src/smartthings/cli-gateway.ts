@@ -93,6 +93,14 @@ export class CliSmartThingsGateway implements SmartThingsGateway {
     )
   }
 
+  async turnDisplayOff(deviceId: string): Promise<void> {
+    await this.#runner.run([
+      'devices:commands',
+      deviceId,
+      `main:${LIGHTING_CAPABILITY}:setLightingLevel("off")`,
+    ])
+  }
+
   async listRules(locationId: string): Promise<ManagedRule[]> {
     const rules = asList<ManagedRule>(
       await this.#runner.runJson(['rules', '--location', locationId, '--json']),

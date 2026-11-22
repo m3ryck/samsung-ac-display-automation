@@ -1,6 +1,7 @@
 import { runRemove } from './app/remove.js'
 import { runSetup } from './app/setup.js'
 import { runStatus } from './app/status.js'
+import { runTestDisplay } from './app/test-display.js'
 import { formatError } from './i18n/format-error.js'
 import { createTranslator, type Translator } from './i18n/index.js'
 import {
@@ -13,7 +14,7 @@ import { CliRunner } from './smartthings/cli-runner.js'
 import type { SmartThingsGateway } from './smartthings/gateway.js'
 import { ConsoleTerminal, type Terminal } from './ui/terminal.js'
 
-const commands = ['setup', 'status', 'update', 'remove'] as const
+const commands = ['setup', 'status', 'update', 'remove', 'test-display'] as const
 type Command = (typeof commands)[number]
 
 interface CliTerminal extends Terminal {
@@ -91,6 +92,8 @@ export const runCli = async (
       case 'remove':
         await runRemove(gateway, terminal, translator)
         break
+      case 'test-display':
+        return await runTestDisplay(gateway, terminal, translator) ? 0 : 1
     }
     return 0
   } catch (error) {

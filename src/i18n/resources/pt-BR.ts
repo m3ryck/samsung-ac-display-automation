@@ -14,7 +14,13 @@ export const ptBR = {
     cancelled: 'Operação cancelada. Nenhuma alteração foi feita.',
     unknown: '?',
   },
-  usage: 'Uso: npm run <setup|status|update|remove> -- [--lang en|pt-BR]',
+  usage: 'Uso: npm run <setup|status|update|remove|test-display> -- [--lang en|pt-BR]',
+  testDisplay: {
+    confirmSend: 'Ligue {{device}} e deixe o visor aceso. Posso enviar o comando para apagar o visor?',
+    confirmObserved: 'A CLI do SmartThings concluiu o envio. O visor do aparelho apagou?',
+    observed: 'Você confirmou que o visor apagou.',
+    unconfirmed: 'Resposta do visor não confirmada. O resultado da CLI, por si só, não comprova compatibilidade.',
+  },
   language: {
     missing: 'A opção --lang exige en ou pt-BR.',
     unsupported: 'Idioma "{{requested}}" não suportado. Use en ou pt-BR.',

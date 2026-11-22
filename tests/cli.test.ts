@@ -119,6 +119,32 @@ describe('runCli language selection', () => {
 })
 
 describe('runCli command dispatch', () => {
+  test('sends the display command only after confirmation and requires visual confirmation', async () => {
+    for (const [answers, expectedCalls, expectedExitCode] of [
+      [[], [], 0],
+      [[true], ['device-1'], 1],
+      [[true, true], ['device-1'], 0],
+    ] as const) {
+      const harness = createHarness('pt-BR')
+      const calls: string[] = []
+      harness.gateway.turnDisplayOff = async deviceId => { calls.push(deviceId) }
+      const exitCode = await runCli(['test-display'], {
+        ...harness.dependencies,
+        createTerminal(translator) {
+          const terminal = harness.dependencies.createTerminal(translator)
+          terminal.confirmAnswers = [...answers]
+          return terminal
+        },
+      })
+
+      assert.equal(exitCode, expectedExitCode)
+      assert.deepEqual(calls, expectedCalls)
+      assert.deepEqual(harness.gateway.created, [])
+      assert.deepEqual(harness.gateway.updated, [])
+      assert.deepEqual(harness.gateway.deleted, [])
+    }
+  })
+
   test('dispatches setup to the setup flow', async () => {
     const harness = createHarness('en')
 
@@ -188,7 +214,7 @@ describe('runCli validation', () => {
       assert.equal(exitCode, 2)
       assert.deepEqual(onlyTerminal(harness).messages, [{
         level: 'error',
-        message: 'Uso: npm run <setup|status|update|remove> -- [--lang en|pt-BR]',
+        message: 'Uso: npm run <setup|status|update|remove|test-display> -- [--lang en|pt-BR]',
       }])
       assert.equal(harness.gatewayCreations, 0)
       assertClosedOnce(harness)

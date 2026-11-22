@@ -11,6 +11,7 @@ export interface SmartThingsGateway {
   listLocations(): Promise<Location[]>
   listDevices(locationId: string): Promise<Device[]>
   getDeviceStatus(deviceId: string): Promise<DeviceStatus>
+  turnDisplayOff(deviceId: string): Promise<void>
   getLightingCapabilityDefinition(): Promise<CapabilityDefinition>
   listRules(locationId: string): Promise<ManagedRule[]>
   createRule(locationId: string, rule: RuleRequest): Promise<ManagedRule>

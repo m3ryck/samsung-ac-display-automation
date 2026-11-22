@@ -12,7 +12,13 @@ export const en = {
     cancelled: 'Operation cancelled. No changes were made.',
     unknown: '?',
   },
-  usage: 'Usage: npm run <setup|status|update|remove> -- [--lang en|pt-BR]',
+  usage: 'Usage: npm run <setup|status|update|remove|test-display> -- [--lang en|pt-BR]',
+  testDisplay: {
+    confirmSend: 'Turn on {{device}} with its display lit. Is it ready to receive the display-off command?',
+    confirmObserved: 'The SmartThings CLI finished sending the command. Did the physical display turn off?',
+    observed: 'You confirmed that the physical display turned off.',
+    unconfirmed: 'Physical display response unconfirmed. The CLI result alone does not establish compatibility.',
+  },
   language: {
     missing: 'The --lang option requires en or pt-BR.',
     unsupported: 'Unsupported language "{{requested}}". Use en or pt-BR.',

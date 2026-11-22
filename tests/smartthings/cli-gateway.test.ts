@@ -37,6 +37,18 @@ const ruleRequest: RuleRequest = {
 }
 
 describe('CliSmartThingsGateway', () => {
+  test('sends only the display-off command to the selected device', async () => {
+    const runner = new FakeRunner()
+    const gateway = new CliSmartThingsGateway({ runner })
+
+    await gateway.turnDisplayOff('device-1')
+
+    assert.deepEqual(runner.calls, [{
+      mode: 'text',
+      arguments_: ['devices:commands', 'device-1', 'main:samsungce.airConditionerLighting:setLightingLevel("off")'],
+    }])
+  })
+
   test('uses explicit JSON commands to discover locations, devices, status, capability, and rules', async () => {
     const runner = new FakeRunner()
     runner.responses.set('locations', { items: [{ locationId: 'location-1', name: 'Casa' }] })

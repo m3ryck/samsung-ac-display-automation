@@ -23,6 +23,7 @@
     "status": "tsx src/index.ts status",
     "update": "tsx src/index.ts update",
     "remove": "tsx src/index.ts remove",
+    "test-display": "tsx src/index.ts test-display",
     "test": "node --import tsx --test \"tests/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "build": "tsc",

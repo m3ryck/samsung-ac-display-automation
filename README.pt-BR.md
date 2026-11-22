@@ -22,6 +22,16 @@ Você executa o instalador uma vez. Depois disso, a automação permanece no Sma
 Ela não controla temperatura, modo, ventilação nem o estado ligado/desligado do aparelho.
 Também reage quando o visor volta a ligar, inclusive após uma mudança feita pelo controle remoto físico.
 
+## Teste direto do visor
+
+Para verificar o comando de iluminação em um modelo como o `AR12DXFAAWKNAZ`, conecte o ar ao SmartThings, ligue-o e deixe o visor aceso. Execute:
+
+```bash
+npm run test-display -- --lang pt-BR
+```
+
+O teste permite escolher o aparelho e pede autorização antes de enviar `setLightingLevel("off")`. Confirme o resultado olhando para o visor físico. O teste não cria nem atualiza Rules. Se o visor não apagar, o suporte ao comando ainda não foi confirmado, mesmo que a CLI conclua o envio.
+
 ## Idioma
 
 Por padrão, o instalador usa o idioma do sistema: qualquer variante de português usa Português (Brasil), variantes de inglês usam inglês e outros idiomas usam inglês como alternativa. Para substituir essa escolha em qualquer comando, use `--lang en` ou `--lang pt-BR`. As duas sintaxes a seguir são aceitas:

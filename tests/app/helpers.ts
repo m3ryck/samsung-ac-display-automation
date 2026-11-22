@@ -79,6 +79,10 @@ export class FakeGateway implements SmartThingsGateway {
     return this.definition
   }
 
+  async turnDisplayOff(_deviceId: string): Promise<void> {
+    throw new Error('Unexpected display command in test.')
+  }
+
   async listRules(locationId: string): Promise<ManagedRule[]> {
     return this.rules.filter(rule => rule.locationId === locationId)
   }
